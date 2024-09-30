@@ -7,7 +7,7 @@ on:
 env:
   EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
   EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
-  LIGHTSAIL_USERNAME: ubuntu
+  EC2_USERNAME: ubuntu
   AWS_REGION: ap-northeast-2
 
 jobs:
