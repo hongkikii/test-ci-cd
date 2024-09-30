@@ -5,9 +5,7 @@ on:
     branches: ['main']
 
 env:
-  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-  EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
-  EC2_USERNAME: ubuntu
+  EC2_USERNAME: AiPro-Spring
   AWS_REGION: ap-northeast-2
 
 jobs:
@@ -40,18 +38,18 @@ jobs:
       - name: Deploy to AWS EC2
         uses: appleboy/scp-action@master
         with:
-          host: ${{ env.EC2_PUBLIC_IP }}
+          host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ${{ env.EC2_USERNAME }}
-          key: ${{ env.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           source: 'build/libs/AiPro-0.0.1-SNAPSHOT.jar'
-          target: '/home/ubuntu/AiPro'
+          target: '/home/AiPro-Spring'
 
       - name: Restart Application
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.EC2_PUBLIC_IP }}
+          host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ${{ env.EC2_USERNAME }}
-          key: ${{ env.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            chmod +x /home/ubuntu/AiPro/build/libs/AiPro-0.0.1-SNAPSHOT.jar
-            sudo systemctl restart AiPro.service
+            chmod +x /home/AiPro-Spring/build/libs/AiPro-0.0.1-SNAPSHOT.jar
+            sudo systemctl restart aipro.service
