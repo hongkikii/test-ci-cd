@@ -40,18 +40,18 @@ jobs:
       - name: Deploy to AWS EC2
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
+          host: ${{ env.EC2_PUBLIC_IP }}
           username: ${{ env.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ env.EC2_SSH_KEY }}
           source: 'build/libs/AiPro-0.0.1-SNAPSHOT.jar'
           target: '/home/AiPro-Spring'
 
       - name: Restart Application
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
+          host: ${{ env.EC2_PUBLIC_IP }}
           username: ${{ env.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ env.EC2_SSH_KEY }}
           script: |
             chmod +x /home/AiPro-Spring/build/libs/AiPro-0.0.1-SNAPSHOT.jar
             sudo systemctl restart aipro.service
