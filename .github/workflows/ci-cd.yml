@@ -5,7 +5,7 @@ on:
     branches: ['main']
 
 env:
-  EC2_USERNAME: AiPro-Spring
+  EC2_USERNAME: ubuntu
   AWS_REGION: ap-northeast-2
 
 jobs:
