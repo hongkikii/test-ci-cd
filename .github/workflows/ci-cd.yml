@@ -5,7 +5,7 @@ on:
     branches: ['main']
 
 env:
-  EC2_USERNAME: ubuntu
+  EC2_USERNAME: root
   AWS_REGION: ap-northeast-2
 
 jobs:
