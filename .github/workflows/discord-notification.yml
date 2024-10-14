@@ -23,7 +23,7 @@ jobs:
               "embeds": [
                 {
                   "title": "[BACKEND] 새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
-                  "description": [title] ${{ toJson(github.event.pull_request.title) }},
+                  "description": "[title] ${{ toJson(github.event.pull_request.title) }}",
                   "url": ${{ toJson(github.event.pull_request.html_url) }},
                   "color": 6847432
                 }
