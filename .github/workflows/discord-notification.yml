@@ -12,8 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: >
-          DESCRIPTION=${{ toJson(github.event.pull_request.body) }};
-          echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
+          PROBLEM=$(
+            echo ${{ toJson(github.event.pull_request.body) }} |
+            grep -Pio 'http[\w\:\/\.-]+' |
+            head -1
+          );
+          echo "PROBLEM=$PROBLEM" >> $GITHUB_ENV
       - env:
           DATA: >
             {
@@ -22,7 +26,7 @@ jobs:
               "embeds": [
                 {
                   "title": ${{ toJson(github.event.pull_request.title) }},
-                  "description": "[PR]새로운 PR이 도착 💨 \n\n${{ env.DESCRIPTION }}",
+                  "description": "새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
                   "url": ${{ toJson(github.event.pull_request.html_url) }},
                   "color": 6847432
                 }
