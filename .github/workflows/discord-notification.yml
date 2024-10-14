@@ -15,23 +15,23 @@ jobs:
             head -1
           );
           echo "PROBLEM=$PROBLEM" >> $GITHUB_ENV
-      - env:
-          DATA: >
-            {
-              "username": ${{ toJson(github.event.sender.login) }},
-              "avatar_url": ${{ toJson(github.event.sender.avatar_url) }},
-              "embeds": [
-                {
-                  "title": "[BACKEND] 새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
-                  "description": "[title] ${{ toJson(github.event.pull_request.title) }}",
-                  "url": ${{ toJson(github.event.pull_request.html_url) }},
-                  "color": 6847432
-                }
-              ]
-            }
-        run: >
-          curl -X
-          POST -H 'Content-type:application/json'
-          -d "$DATA"
-          ${{ secrets.DISCORD_WEBHOOK_URL }}
+      # - env:
+      #     DATA: >
+      #       {
+      #         "username": ${{ toJson(github.event.sender.login) }},
+      #         "avatar_url": ${{ toJson(github.event.sender.avatar_url) }},
+      #         "embeds": [
+      #           {
+      #             "title": "[BACKEND] 새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
+      #             "description": "[title] ${{ toJson(github.event.pull_request.title) }}",
+      #             "url": ${{ toJson(github.event.pull_request.html_url) }},
+      #             "color": 6847432
+      #           }
+      #         ]
+      #       }
+      #   run: >
+      #     curl -X
+      #     POST -H 'Content-type:application/json'
+      #     -d "$DATA"
+      #     ${{ secrets.DISCORD_WEBHOOK_URL }}
 
