@@ -22,8 +22,8 @@ jobs:
               "avatar_url": ${{ toJson(github.event.sender.avatar_url) }},
               "embeds": [
                 {
-                  "title": ${{ toJson(github.event.pull_request.title) }},
-                  "description": "[BACKEND] 새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
+                  "title": "[BACKEND] 새로운 PR 도착💨 \n\n${{ env.PROBLEM }}",
+                  "description": [title] ${{ toJson(github.event.pull_request.title) }},
                   "url": ${{ toJson(github.event.pull_request.html_url) }},
                   "color": 6847432
                 }
