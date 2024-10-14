@@ -8,6 +8,7 @@ public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
+		System.out.println("디스코드 알림이 내가 원하는대로 갈까요?");
 	}
 
 }
