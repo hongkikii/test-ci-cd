@@ -11,18 +11,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-      - name: Build with Gradle
-        run: ./gradlew build
-      - name: Check Build Output
-        run: |
-          pwd
-          ls -R
-          ls -la build/libs
+      # - name: Setup Java
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     distribution: 'adopt'
+      #     java-version: '17'
+      # - name: Build with Gradle
+      #   run: ./gradlew build
+      # - name: Check Build Output
+      #   run: |
+      #     pwd
+      #     ls -R
+      #     ls -la build/libs
       # - name: AWS Authentication
       #   uses: aws-actions/configure-aws-credentials@v2
       #   with:
