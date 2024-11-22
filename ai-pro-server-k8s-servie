@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-pro-server-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: ai-pro-server
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
