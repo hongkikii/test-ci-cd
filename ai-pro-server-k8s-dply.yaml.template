@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ai-pro-server
-        image: ${ECR_HOST}/k8sbook/backend-app:1.0.0 
+        image: ${ECR_HOST}/ai-pro/server:1.0.0 
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
