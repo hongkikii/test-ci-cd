@@ -42,7 +42,7 @@ spec:
               key: jwt-secret
               name: app-config
         - name: AI_URL
-           valueFrom:
+          valueFrom:
             secretKeyRef:
               key: ai-url
               name: app-config         
