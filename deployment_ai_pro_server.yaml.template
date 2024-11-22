@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-pro-server
+  labels:
+    app: ai-pro-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-pro-server
+  template:
+    metadata:
+      labels:
+        app: ai-pro-server
+    spec:
+      containers:
+      - name: ai-pro-server
+        image: ${ECR_HOST}/k8sbook/backend-app:1.0.0 
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              key: db-url
+              name: db-config
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: db-username
+              name: db-config
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: db-password
+              name: db-config
+        readinessProbe:
+          httpGet:
+            port: 8080
+            path: /health
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            port: 8080
+            path: /health
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 768Mi
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 2"]
