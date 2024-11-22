@@ -36,6 +36,16 @@ spec:
             secretKeyRef:
               key: db-password
               name: db-config
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: jwt-secret
+              name: app-config
+        - name: AI_URL
+           valueFrom:
+            secretKeyRef:
+              key: ai-url
+              name: app-config         
         readinessProbe:
           httpGet:
             port: 8080
