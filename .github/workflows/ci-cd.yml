@@ -45,7 +45,7 @@ jobs:
       run: |
         if ! kubectl get service spring-boot-service &>/dev/null; then
           echo "Creating initial service..."
-          cat <<EOF | kubectl apply -f -
+          cat <<'EOF' | kubectl apply -f -
           apiVersion: v1
           kind: Service
           metadata:
@@ -60,43 +60,43 @@ jobs:
                 targetPort: 8080
             type: LoadBalancer
         EOF
-          
-          echo "Creating initial blue deployment..."
-          cat <<EOF | kubectl apply -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: spring-boot-blue
-          spec:
-            replicas: 2
-            selector:
-              matchLabels:
+      
+        echo "Creating initial blue deployment..."
+        cat <<'EOF' | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: spring-boot-blue
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: spring-boot
+              version: blue
+          template:
+            metadata:
+              labels:
                 app: spring-boot
                 version: blue
-            template:
-              metadata:
-                labels:
-                  app: spring-boot
-                  version: blue
-              spec:
-                containers:
-                - name: spring-boot
-                  image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-                  ports:
-                  - containerPort: 8080
-                  readinessProbe:
-                    httpGet:
-                      path: /
-                      port: 8080
-                    initialDelaySeconds: 15
-                    periodSeconds: 5
-                  livenessProbe:
-                    httpGet:
-                      path: /
-                      port: 8080
-                    initialDelaySeconds: 30
-                    periodSeconds: 10
-          EOF
+            spec:
+              containers:
+              - name: spring-boot
+                image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+                ports:
+                - containerPort: 8080
+                readinessProbe:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 15
+                  periodSeconds: 5
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+        EOF
         fi
 
     - name: Check current deployment
