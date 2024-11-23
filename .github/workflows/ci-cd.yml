@@ -244,12 +244,51 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       run: |
         if [ $? -eq 0 ]; then
-          MESSAGE="🚀 **배포 성공! 새로운 버전이 사용되기 시작했습니다🎉**"
+          STATUS="성공 🚀"
+          COLOR="5763719" 
+          DESCRIPTION="✨ 새로운 버전이 성공적으로 배포되었습니다!"
         else
-          MESSAGE="❌ **배포 실패! 이전 버전으로 롤백되었습니다🥲**"
+          STATUS="실패 ❌"
+          COLOR="15548997"
+          DESCRIPTION="🔄 이전 버전으로 롤백되었습니다."
         fi
+        
+        DEPLOY_TIME=$(TZ='Asia/Seoul' date '+%Y-%m-%d %H:%M:%S')
         
         curl -H "Content-Type: application/json" \
              -d '{
-               "content": "'"$MESSAGE"'\n저장소: ${{ github.repository }}\n커밋: ${GITHUB_SHA::7}"
+               "embeds": [{
+                 "title": "'"📦 배포 $STATUS"'",
+                 "description": "'"$DESCRIPTION"'",
+                 "color": '"$COLOR"',
+                 "fields": [
+                   {
+                     "name": "🏗️ 저장소",
+                     "value": "'"${{ github.repository }}"'",
+                     "inline": true
+                   },
+                   {
+                     "name": "🌿 브랜치",
+                     "value": "'"${GITHUB_REF#refs/heads/}"'",
+                     "inline": true
+                   },
+                   {
+                     "name": "📝 커밋",
+                     "value": "```'"${IMAGE_TAG}"'```",
+                     "inline": false
+                   },
+                   {
+                     "name": "⏰ 배포 시간",
+                     "value": "'"$DEPLOY_TIME"'",
+                     "inline": false
+                   }
+                 ],
+                 "thumbnail": {
+                   "url": "https://github.com/fluidicon.png"
+                 },
+                 "footer": {
+                   "text": "GitHub Actions CI/CD",
+                   "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                 }
+               }]
              }' $DISCORD_WEBHOOK
