@@ -201,7 +201,7 @@ jobs:
         
         while [ $SECONDS -lt $END_TIME ]; do
           SERVICE_IP=$(kubectl get service spring-boot-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${SERVICE_IP}/actuator/health)
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${SERVICE_IP}/)
           
           if [ "$HEALTH_STATUS" != "200" ]; then
             FAILURE_COUNT=$((FAILURE_COUNT + 1))
