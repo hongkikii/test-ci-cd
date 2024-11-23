@@ -14,7 +14,7 @@ public class TestController {
 
     @GetMapping("/ver")
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @GetMapping("/rollback")
