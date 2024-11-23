@@ -259,6 +259,7 @@ jobs:
       if: always()
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        DEPLOYMENT_STATUS: ${{ steps.monitor.outputs.deployment_status }}
       run: |
         if [ "$DEPLOYMENT_STATUS" == "success" ]; then
           STATUS="성공 🚀"
