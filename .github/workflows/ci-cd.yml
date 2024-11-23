@@ -172,7 +172,7 @@ jobs:
         PF_PID=$!
         sleep 5
         
-        HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health)
+        HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
         kill $PF_PID
         
         if [ "$HEALTH_STATUS" != "200" ]; then
