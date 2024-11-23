@@ -10,8 +10,10 @@ public class TestController {
 
     // health check api: 정상/예외 응답 경우에 따라 트래픽을 새로운 서비스로 돌릴지 말지 결정
     @GetMapping("/")
-    public HttpStatus healthCheck() {
-        return HttpStatus.OK;
+    public ResponseEntity<String> healthCheck() {
+//        return ResponseEntity.ok("OK");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("BAD_REQUEST");
     }
 
     // 애플리케이션 버전 확인 api: 테스트때마다 +1
