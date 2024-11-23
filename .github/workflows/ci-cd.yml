@@ -240,17 +240,16 @@ jobs:
 
     - name: Notify deployment status
       if: always()
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const { status, conclusion } = context.job
-          const message = status === 'success' 
-            ? '✅ Deployment completed successfully' 
-            : '❌ Deployment failed'
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.name,
-            body: message
-          })
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      run: |
+        if [ $? -eq 0 ]; then
+          MESSAGE="🚀 **배포 성공! 새로운 버전이 사용되기 시작했습니다🎉**"
+        else
+          MESSAGE="❌ **배포 실패! 이전 버전으로 롤백되었습니다🥲**"
+        fi
+        
+        curl -H "Content-Type: application/json" \
+             -d '{
+               "content": "'"$MESSAGE"'\n저장소: ${{ github.repository }}\n커밋: ${GITHUB_SHA::7}"
+             }' $DISCORD_WEBHOOK
