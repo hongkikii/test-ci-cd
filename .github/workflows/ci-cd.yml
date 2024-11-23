@@ -188,7 +188,7 @@ jobs:
       run: |
         kubectl patch service spring-boot-service -p "{\"spec\":{\"selector\":{\"version\":\"${NEW_VERSION}\"}}}"
         echo "Traffic switched to ${NEW_VERSION} version"
-
+        
     - name: Monitor deployment
       env:
         NEW_VERSION: ${{ steps.check-deployment.outputs.new_version }}
@@ -196,31 +196,48 @@ jobs:
       run: |
         FAILURE_THRESHOLD=3
         FAILURE_COUNT=0
-        SUCCESS_THRESHOLD=3  # 연속 성공 횟수 임계값
-        SUCCESS_COUNT=0      # 성공 횟수 카운터
+        SUCCESS_THRESHOLD=3
+        SUCCESS_COUNT=0
         MONITORING_DURATION=300
         END_TIME=$((SECONDS + MONITORING_DURATION))
         
         while [ $SECONDS -lt $END_TIME ]; do
           SERVICE_IP=$(kubectl get service spring-boot-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${SERVICE_IP}/rollback)
           
-          if [ "$HEALTH_STATUS" != "200" ]; then
+          # 응답 코드와 응답 본문을 모두 저장
+          RESPONSE=$(curl -s -w "\n%{http_code}" http://${SERVICE_IP}/rollback)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          HTTP_BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "Received HTTP Code: $HTTP_CODE"
+          echo "Received Response Body: $HTTP_BODY"
+          
+          # 응답 코드가 정확히 200이 아니면 실패로 처리
+          if [ "$HTTP_CODE" != "200" ]; then
             FAILURE_COUNT=$((FAILURE_COUNT + 1))
-            SUCCESS_COUNT=0  # 실패시 성공 카운트 리셋
-            echo "Health check failed. Failure count: $FAILURE_COUNT"
+            SUCCESS_COUNT=0
+            echo "Health check failed with status code: $HTTP_CODE"
+            echo "Failure count: $FAILURE_COUNT"
             
             if [ $FAILURE_COUNT -ge $FAILURE_THRESHOLD ]; then
               echo "Failure threshold exceeded. Rolling back..."
+              echo "Last failed response code: $HTTP_CODE"
+              echo "Last failed response body: $HTTP_BODY"
+              
+              # 롤백 수행
               kubectl patch service spring-boot-service -p "{\"spec\":{\"selector\":{\"version\":\"${CURRENT_VERSION}\"}}}"
               kubectl delete deployment spring-boot-${NEW_VERSION}
+              
+              # 롤백 후 파드 상태 확인
+              echo "Checking pods after rollback:"
+              kubectl get pods -l version=${CURRENT_VERSION}
+              
               exit 1
             fi
           else
-            echo "Health check passed"
+            echo "Health check passed with status code: $HTTP_CODE"
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
             
-            # 연속 3번 성공하면 모니터링 종료
             if [ $SUCCESS_COUNT -ge $SUCCESS_THRESHOLD ]; then
               echo "Deployment successfully stabilized after $SUCCESS_COUNT consecutive successful health checks"
               exit 0
