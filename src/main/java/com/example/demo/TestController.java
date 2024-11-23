@@ -15,12 +15,13 @@ public class TestController {
 
     @GetMapping("/ver")
     public int getVersion() {
-        return 5;
+        return 6;
     }
 
     @GetMapping("/rollback")
     public ResponseEntity<String> rollback() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("BAD_REQUEST");
+        return ResponseEntity.ok("OK");
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body("BAD_REQUEST");
     }
 }
