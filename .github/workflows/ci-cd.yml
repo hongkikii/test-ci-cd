@@ -190,9 +190,11 @@ jobs:
         echo "Traffic switched to ${NEW_VERSION} version"
         
     - name: Monitor deployment
+      id: monitor
       env:
         NEW_VERSION: ${{ steps.check-deployment.outputs.new_version }}
         CURRENT_VERSION: ${{ steps.check-deployment.outputs.current_version }}
+      continue-on-error: true
       run: |
         FAILURE_THRESHOLD=3
         FAILURE_COUNT=0
@@ -204,7 +206,6 @@ jobs:
         while [ $SECONDS -lt $END_TIME ]; do
           SERVICE_IP=$(kubectl get service spring-boot-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           
-          # 응답 코드와 응답 본문을 모두 저장
           RESPONSE=$(curl -s -w "\n%{http_code}" http://${SERVICE_IP}/rollback)
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           HTTP_BODY=$(echo "$RESPONSE" | head -n -1)
@@ -212,7 +213,6 @@ jobs:
           echo "Received HTTP Code: $HTTP_CODE"
           echo "Received Response Body: $HTTP_BODY"
           
-          # 응답 코드가 정확히 200이 아니면 실패로 처리
           if [ "$HTTP_CODE" != "200" ]; then
             FAILURE_COUNT=$((FAILURE_COUNT + 1))
             SUCCESS_COUNT=0
@@ -224,14 +224,13 @@ jobs:
               echo "Last failed response code: $HTTP_CODE"
               echo "Last failed response body: $HTTP_BODY"
               
-              # 롤백 수행
               kubectl patch service spring-boot-service -p "{\"spec\":{\"selector\":{\"version\":\"${CURRENT_VERSION}\"}}}"
               kubectl delete deployment spring-boot-${NEW_VERSION}
               
-              # 롤백 후 파드 상태 확인
               echo "Checking pods after rollback:"
               kubectl get pods -l version=${CURRENT_VERSION}
-              
+        
+              echo "::set-output name=deployment_status::failed"
               exit 1
             fi
           else
@@ -240,6 +239,7 @@ jobs:
             
             if [ $SUCCESS_COUNT -ge $SUCCESS_THRESHOLD ]; then
               echo "Deployment successfully stabilized after $SUCCESS_COUNT consecutive successful health checks"
+              echo "::set-output name=deployment_status::success"
               exit 0
             fi
           fi
@@ -260,7 +260,7 @@ jobs:
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       run: |
-        if [ $? -eq 0 ]; then
+        if [[ "$DEPLOYMENT_STATUS" == "success" && "$DEPLOYMENT_OUTCOME" == "success" ]]; then
           STATUS="성공 🚀"
           COLOR="5763719" 
           DESCRIPTION="✨ 새로운 버전이 성공적으로 배포되었습니다!"
