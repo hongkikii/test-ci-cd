@@ -248,7 +248,7 @@ jobs:
         done
 
     - name: Cleanup old deployment
-      if: success()
+      if: steps.monitor.outputs.deployment_status == 'success'
       env:
         CURRENT_VERSION: ${{ steps.check-deployment.outputs.current_version }}
       run: |
@@ -260,7 +260,7 @@ jobs:
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       run: |
-        if [[ "$DEPLOYMENT_STATUS" == "success" && "$DEPLOYMENT_OUTCOME" == "success" ]]; then
+        if [ "$DEPLOYMENT_STATUS" == "success" ]; then
           STATUS="성공 🚀"
           COLOR="5763719" 
           DESCRIPTION="✨ 새로운 버전이 성공적으로 배포되었습니다!"
