@@ -17,8 +17,8 @@ public class TestController {
         return 2;
     }
 
-    @GetMapping("/api")
-    public String api() {
-        return "Hello World";
+    @GetMapping("/rollback")
+    public HttpStatus rollback() {
+        return HttpStatus.BAD_REQUEST;
     }
 }
