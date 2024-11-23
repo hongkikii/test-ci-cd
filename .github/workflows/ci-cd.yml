@@ -196,6 +196,8 @@ jobs:
       run: |
         FAILURE_THRESHOLD=3
         FAILURE_COUNT=0
+        SUCCESS_THRESHOLD=3  # 연속 성공 횟수 임계값
+        SUCCESS_COUNT=0      # 성공 횟수 카운터
         MONITORING_DURATION=300
         END_TIME=$((SECONDS + MONITORING_DURATION))
         
@@ -205,6 +207,7 @@ jobs:
           
           if [ "$HEALTH_STATUS" != "200" ]; then
             FAILURE_COUNT=$((FAILURE_COUNT + 1))
+            SUCCESS_COUNT=0  # 실패시 성공 카운트 리셋
             echo "Health check failed. Failure count: $FAILURE_COUNT"
             
             if [ $FAILURE_COUNT -ge $FAILURE_THRESHOLD ]; then
@@ -215,6 +218,13 @@ jobs:
             fi
           else
             echo "Health check passed"
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            
+            # 연속 3번 성공하면 모니터링 종료
+            if [ $SUCCESS_COUNT -ge $SUCCESS_THRESHOLD ]; then
+              echo "Deployment successfully stabilized after $SUCCESS_COUNT consecutive successful health checks"
+              exit 0
+            fi
           fi
           
           sleep 10
