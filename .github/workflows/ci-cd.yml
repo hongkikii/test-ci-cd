@@ -41,6 +41,65 @@ jobs:
       run: |
         aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
 
+    - name: Deploy initial service and blue deployment if not exists
+      run: |
+        if ! kubectl get service spring-boot-service &>/dev/null; then
+          echo "Creating initial service..."
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: spring-boot-service
+          spec:
+            selector:
+              app: spring-boot
+              version: blue
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 8080
+            type: LoadBalancer
+        EOF
+          
+          echo "Creating initial blue deployment..."
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: spring-boot-blue
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: spring-boot
+                version: blue
+            template:
+              metadata:
+                labels:
+                  app: spring-boot
+                  version: blue
+              spec:
+                containers:
+                - name: spring-boot
+                  image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+                  ports:
+                  - containerPort: 8080
+                  readinessProbe:
+                    httpGet:
+                      path: /
+                      port: 8080
+                    initialDelaySeconds: 15
+                    periodSeconds: 5
+                  livenessProbe:
+                    httpGet:
+                      path: /
+                      port: 8080
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+          EOF
+        fi
+
+
     - name: Check current deployment
       id: check-deployment
       run: |
@@ -82,13 +141,13 @@ jobs:
                 - containerPort: 8080
                 readinessProbe:
                   httpGet:
-                    path: /actuator/health
+                    path: /
                     port: 8080
                   initialDelaySeconds: 15
                   periodSeconds: 5
                 livenessProbe:
                   httpGet:
-                    path: /actuator/health
+                    path: /
                     port: 8080
                   initialDelaySeconds: 30
                   periodSeconds: 10
@@ -104,15 +163,12 @@ jobs:
       env:
         NEW_VERSION: ${{ steps.check-deployment.outputs.new_version }}
       run: |
-        # 새 파드의 상태 확인
         echo "Checking pod status..."
         kubectl get pods -l version=${NEW_VERSION}
         
-        # 헬스체크 수행
         echo "Performing health checks..."
         NEW_POD=$(kubectl get pods -l version=${NEW_VERSION} -o jsonpath='{.items[0].metadata.name}')
         
-        # 포트 포워딩 설정 및 헬스체크
         kubectl port-forward $NEW_POD 8080:8080 &
         PF_PID=$!
         sleep 5
