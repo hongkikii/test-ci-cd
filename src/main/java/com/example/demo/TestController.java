@@ -14,7 +14,7 @@ public class TestController {
 
     @GetMapping("/ver")
     public int getVersion() {
-        return 1;
+        return 2;
     }
 
     @GetMapping("/api")
