@@ -241,7 +241,7 @@ jobs:
     - name: Notify deployment status
       if: always()
       env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       run: |
         if [ $? -eq 0 ]; then
           MESSAGE="🚀 **배포 성공! 새로운 버전이 사용되기 시작했습니다🎉**"
