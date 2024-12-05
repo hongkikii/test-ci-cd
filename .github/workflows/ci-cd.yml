@@ -11,6 +11,28 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
+  check-source-branch:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0 
+  
+        - name: Check if push came from test branch merge
+          run: |
+            LAST_MERGE_COMMIT=$(git log -1 --merges --pretty=format:"%H")
+            if [ -n "$LAST_MERGE_COMMIT" ]; then
+              MERGE_PARENTS=$(git log -1 --merges --pretty=format:"%P" $LAST_MERGE_COMMIT)
+              SOURCE_BRANCH=$(git name-rev --name-only $(echo $MERGE_PARENTS | cut -d' ' -f2))
+              if [[ $SOURCE_BRANCH != *"test"* ]]; then
+                echo "ERROR: This merge did not come from the 'test' branch"
+                exit 1
+              fi
+            else
+              echo "ERROR: This is not a merge commit"
+              exit 1
+            fi
   deploy:
     runs-on: ubuntu-latest
     
