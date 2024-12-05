@@ -1,7 +1,7 @@
 name: CI CD
 on:
   push:
-    branches: ['main']
+    branches: ['staging']
 env:
   EC2_USERNAME: ubuntu
   AWS_REGION: ap-northeast-2
